@@ -12,6 +12,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"uppies/cli/api"
+	"uppies/cli/internal/terminal"
 	"uppies/cli/internal/utils"
 )
 
@@ -100,7 +101,7 @@ func verifySite(name string) {
 			os.Exit(1)
 		}
 
-		time.Sleep(utils.StatusRetryInterval)
+		time.Sleep(terminal.StatusRetryInterval)
 		verifySite(name)
 	}
 }
@@ -115,10 +116,10 @@ func plzRun(cmd *cobra.Command, args []string) {
 	fmt.Println("\\o/ Uppies!")
 	fmt.Println("")
 
-	utils.RunStage("Processing", func() { absFolder = resolvePath(folder) })
-	utils.RunStage("Archiving", func() { zipBytes = packageFolder(absFolder) })
-	utils.RunStage("Uploading", func() { resp = uploadArchive(zipBytes) })
-	utils.RunStage("Verifying", func() { verifySite(resp.Data.Name) })
+	terminal.RunStage("Processing", func() { absFolder = resolvePath(folder) })
+	terminal.RunStage("Archiving", func() { zipBytes = packageFolder(absFolder) })
+	terminal.RunStage("Uploading", func() { resp = uploadArchive(zipBytes) })
+	terminal.RunStage("Verifying", func() { verifySite(resp.Data.Name) })
 
 	fmt.Printf("You can now access your site at: %s\n", resp.Data.URL)
 }
