@@ -10,10 +10,11 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/spf13/cobra"
 	"uppies/cli/api"
 	"uppies/cli/internal/terminal"
 	"uppies/cli/internal/utils"
+
+"github.com/spf13/cobra"
 )
 
 func resolvePath(path string) string {

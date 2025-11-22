@@ -55,3 +55,16 @@ func LoadConfig() {
 	}
 	Token = data.Token
 }
+
+func SaveConfig() {
+	configPath := getConfigPath()
+	data := configData{
+		Token: Token,
+	}
+	file, err := os.Create(configPath)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+	json.NewEncoder(file).Encode(data)
+}

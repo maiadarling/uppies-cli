@@ -10,7 +10,7 @@ type Spinner struct {
 	Delay time.Duration
 }
 
-var Default = Spinner{
+var BigDots = Spinner{
 	Chars: []string{"⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"},
 	Delay: 100 * time.Millisecond,
 }

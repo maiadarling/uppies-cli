@@ -49,7 +49,7 @@ func RunStage(label string, fn func(), spinner ...spinners.Spinner) {
 
 	// Hide the cursor
 	fmt.Print("  " + string(Cyan) + label + "... " + string(Reset))
-	s := spinners.Default
+	s := spinners.Dots
 	if len(spinner) > 0 {
 		s = spinner[0]
 	}
