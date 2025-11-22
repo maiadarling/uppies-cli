@@ -18,6 +18,7 @@ func main() {
 
 	rootCmd.AddCommand(commands.LoginCommand())
 	rootCmd.AddCommand(commands.PlzCommand())
+	rootCmd.AddCommand(commands.ListCommand())
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

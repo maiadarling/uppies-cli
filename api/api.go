@@ -1,4 +1,4 @@
-package commands
+package api
 
 import (
 	"bytes"
@@ -35,6 +35,14 @@ type UploadResponse struct {
 
 type SiteResponse struct {
 	Data struct {
+		Name   string `json:"name"`
+		URL    string `json:"url"`
+		Status string `json:"status"`
+	} `json:"data"`
+}
+
+type ListSitesResponse struct {
+	Data []struct {
 		Name   string `json:"name"`
 		URL    string `json:"url"`
 		Status string `json:"status"`
@@ -94,6 +102,34 @@ func (c *APIClient) GetSite(name string) (SiteResponse, error) {
 
 	if resp.StatusCode != 200 {
 		return respData, fmt.Errorf("get site failed with status: %d", resp.StatusCode)
+	}
+
+	err = json.NewDecoder(resp.Body).Decode(&respData)
+	if err != nil {
+		return respData, fmt.Errorf("decoding response: %w", err)
+	}
+
+	return respData, nil
+}
+
+func (c *APIClient) ListSites() (ListSitesResponse, error) {
+	var respData ListSitesResponse
+	req, err := http.NewRequest("GET", c.BaseURL+"/sites", nil)
+	if err != nil {
+		return respData, fmt.Errorf("creating request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+c.Token)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return respData, fmt.Errorf("sending request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return respData, fmt.Errorf("list sites failed with status: %d", resp.StatusCode)
 	}
 
 	err = json.NewDecoder(resp.Body).Decode(&respData)

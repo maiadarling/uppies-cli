@@ -11,30 +11,9 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"uppies/cli/config"
+	"uppies/cli/api"
+	"uppies/cli/internal/utils"
 )
-
-const SpinnerDelay = 100 * time.Millisecond
-const StatusRetryInterval = 2 * time.Second
-
-func startSpinner() chan bool {
-	stop := make(chan bool)
-	go func() {
-		chars := []string{"⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"}
-		i := 0
-		for {
-			select {
-			case <-stop:
-				return
-			default:
-				fmt.Printf("\b%s", chars[i%8])
-				time.Sleep(SpinnerDelay)
-				i++
-			}
-		}
-	}()
-	return stop
-}
 
 func resolvePath(path string) string {
 	abs, err := filepath.Abs(path)
@@ -92,9 +71,9 @@ func packageFolder(folder string) []byte {
 	return buf.Bytes()
 }
 
-func uploadArchive(archive []byte) UploadResponse {
+func uploadArchive(archive []byte) api.UploadResponse {
 	encoded := base64.StdEncoding.EncodeToString(archive)
-	client := NewAPIClient()
+	client := api.NewAPIClient()
 	resp, err := client.UploadSite(encoded)
 	if err != nil {
 		fmt.Println("Error uploading:", err)
@@ -104,7 +83,7 @@ func uploadArchive(archive []byte) UploadResponse {
 }
 
 func verifySite(name string) {
-	client := NewAPIClient()
+	client := api.NewAPIClient()
 	for {
 		resp, err := client.GetSite(name)
 		if err != nil {
@@ -121,42 +100,27 @@ func verifySite(name string) {
 			os.Exit(1)
 		}
 
-		time.Sleep(StatusRetryInterval)
+		time.Sleep(utils.StatusRetryInterval)
 		verifySite(name)
 	}
-}
-
-func runStage(label string, fn func()) {
-	fmt.Print("-> " + label + "... ")
-	stop := startSpinner()
-	fn()
-	stop <- true
-	fmt.Println("\b Done")
 }
 
 func plzRun(cmd *cobra.Command, args []string) {
 	var absFolder string
 	var zipBytes []byte
-	var resp UploadResponse
+	var resp api.UploadResponse
 
 	folder := args[0]
 
 	fmt.Println("\\o/ Uppies!")
 	fmt.Println("")
 
-	runStage("Processing", func() { absFolder = resolvePath(folder) })
-	runStage("Archiving", func() { zipBytes = packageFolder(absFolder) })
-	runStage("Uploading", func() { resp = uploadArchive(zipBytes) })
-	runStage("Verifying", func() { verifySite(resp.Data.Name) })
+	utils.RunStage("Processing", func() { absFolder = resolvePath(folder) })
+	utils.RunStage("Archiving", func() { zipBytes = packageFolder(absFolder) })
+	utils.RunStage("Uploading", func() { resp = uploadArchive(zipBytes) })
+	utils.RunStage("Verifying", func() { verifySite(resp.Data.Name) })
 
 	fmt.Printf("You can now access your site at: %s\n", resp.Data.URL)
-}
-
-func requireLogin(cmd *cobra.Command, args []string) {
-	if config.Token == "" {
-		fmt.Println("You must be logged in to use this command. Run 'uppies login' to authenticate.")
-		os.Exit(1)
-	}
 }
 
 func PlzCommand() *cobra.Command {
@@ -164,7 +128,7 @@ func PlzCommand() *cobra.Command {
 		Use:     "plz [folder]",
 		Short:   "Execute the plz command",
 		Args:    cobra.ExactArgs(1),
-		PreRun:  requireLogin,
+		PreRun:  utils.RequireLogin,
 		Run:     plzRun,
 	}
 }
