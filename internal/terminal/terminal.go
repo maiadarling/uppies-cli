@@ -3,9 +3,10 @@ package terminal
 import (
 	"fmt"
 	"time"
+
+	"uppies/cli/internal/terminal/spinners"
 )
 
-const SpinnerDelay = 100 * time.Millisecond
 const StatusRetryInterval = 2 * time.Second
 
 type AnsiCode string
@@ -31,47 +32,37 @@ const (
 	ClearLine   AnsiCode = "\033[2K"
 )
 
-func StartSpinner() chan bool {
-	stop := make(chan bool)
-	go func() {
-		chars := []string{"⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"}
-		i := 0
-		for {
-			select {
-			case <-stop:
-				return
-			default:
-				moveBOL()
-				fmt.Printf("%s", chars[i%8])
-				time.Sleep(SpinnerDelay)
-				i++
-			}
-		}
-	}()
-	return stop
-}
-
-func moveBOL() {
-	fmt.Print("\r")
-}
-
 func clearLine() {
 	fmt.Print(string(ClearLine))
 }
 
-func RunStage(label string, fn func()) {
+func hideCursor() {
+	fmt.Print(string(HideCursor))
+}
+
+func showCursor() {
+	fmt.Print(string(ShowCursor))
+}
+
+func RunStage(label string, fn func(), spinner ...spinners.Spinner) {
+	hideCursor()
+
 	// Hide the cursor
 	fmt.Print("  " + string(Cyan) + label + "... " + string(Reset))
-	stop := StartSpinner()
+	s := spinners.Default
+	if len(spinner) > 0 {
+		s = spinner[0]
+	}
+	stop := spinners.StartSpinner(s)
 	fn()
 	stop <- true
 
-	moveBOL()
+	fmt.Print("\r")
 
 	fmt.Print("✓ " + string(Green) + label + "      " + string(Reset))
 
-
-
 	fmt.Println("Done")
+
+	showCursor()
 }
 
