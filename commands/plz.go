@@ -14,7 +14,7 @@ import (
 	"uppies/cli/internal/terminal"
 	"uppies/cli/internal/utils"
 
-"github.com/spf13/cobra"
+	"github.com/spf13/cobra"
 )
 
 func resolvePath(path string) string {
@@ -73,7 +73,7 @@ func packageFolder(folder string) []byte {
 	return buf.Bytes()
 }
 
-func uploadArchive(archive []byte) api.UploadResponse {
+func uploadArchive(archive []byte) api.SingleResponse {
 	encoded := base64.StdEncoding.EncodeToString(archive)
 	client := api.NewAPIClient()
 	resp, err := client.UploadSite(encoded)
@@ -110,7 +110,7 @@ func verifySite(name string) {
 func plzRun(cmd *cobra.Command, args []string) {
 	var absFolder string
 	var zipBytes []byte
-	var resp api.UploadResponse
+	var resp api.SingleResponse
 
 	folder := args[0]
 

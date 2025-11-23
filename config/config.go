@@ -13,9 +13,16 @@ const (
 
 type configData struct {
 	Token string `json:"token"`
+	Host string `json:"host"`
 }
 
 var Token string
+var Host string
+
+var defaultConfig = configData{
+	Token: "",
+	Host:  "http://api.uppiesplz.com:3000",
+}
 
 func getConfigPath() string {
 	home, err := os.UserHomeDir()
@@ -32,9 +39,7 @@ func LoadConfig() {
 	var data configData
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		// Create default config
-		data = configData{
-			Token: "",
-		}
+		data = defaultConfig
 		// Ensure directory exists
 		os.MkdirAll(configDir, 0755)
 		// Write to file
@@ -52,14 +57,24 @@ func LoadConfig() {
 		}
 		defer file.Close()
 		json.NewDecoder(file).Decode(&data)
+
+		if data.Token == "" {
+			data.Token = defaultConfig.Token
+		}
+
+		if data.Host == "" {
+			data.Host = defaultConfig.Host
+		}
 	}
 	Token = data.Token
+	Host = data.Host
 }
 
 func SaveConfig() {
 	configPath := getConfigPath()
 	data := configData{
 		Token: Token,
+		Host:  Host,
 	}
 	file, err := os.Create(configPath)
 	if err != nil {
