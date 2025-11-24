@@ -19,6 +19,7 @@ func main() {
 	rootCmd.AddCommand(commands.LoginCommand())
 	rootCmd.AddCommand(commands.PlzCommand())
 	rootCmd.AddCommand(commands.ListCommand())
+	rootCmd.AddCommand(commands.ProfileCommand())
 	rootCmd.AddCommand(commands.TestCommand())
 
 	if err := rootCmd.Execute(); err != nil {

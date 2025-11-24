@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/spf13/cobra"
 	"uppies/cli/api"
 	"uppies/cli/internal/utils"
+
+	"github.com/spf13/cobra"
+	"github.com/olekukonko/tablewriter"
 )
 
 func listRun(cmd *cobra.Command, args []string) {
@@ -17,9 +19,22 @@ func listRun(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
+	table := tablewriter.NewWriter(os.Stdout)
+	table.Header([]string{"Name", "Domains", "Status"})
+
+
 	for _, site := range sites.Data {
-		fmt.Printf("Name: %s, URL: %s, Status: %s\n", site.Name, site.URL, site.Status)
+		// Join domains by new line
+		domains := ""
+		for i, domain := range site.Domains {
+			if i > 0 {
+				domains += "\n"
+			}
+			domains += domain
+		}
+		table.Append([]string{site.Name, domains, site.Status})
 	}
+	table.Render()
 }
 
 func ListCommand() *cobra.Command {

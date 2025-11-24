@@ -28,16 +28,17 @@ func NewAPIClient() *APIClient {
 
 // MARK: Types
 type Item struct {
-	Name   string `json:"name"`
-	URL    string `json:"url"`
-	Status string `json:"status"`
+	Name    string   `json:"name"`
+	URL     string   `json:"url"`
+	Domains []string `json:"domains"`
+	Status  string   `json:"status"`
 }
 
 type Pagination struct {
 }
 
 type SuccessfulResponse[T any] struct {
-	Data       T          `json:"data"`
+	Data       T           `json:"data"`
 	Pagination *Pagination `json:"pagination,omitempty"`
 	Message    *string     `json:"message,omitempty"`
 }
@@ -47,7 +48,7 @@ type ErrorResponse struct {
 }
 
 type APIResponse[T any] struct {
-	Data       T          `json:"data,omitempty"`
+	Data       T           `json:"data,omitempty"`
 	Pagination *Pagination `json:"pagination,omitempty"`
 	Message    *string     `json:"message,omitempty"`
 	Error      *string     `json:"error,omitempty"`
