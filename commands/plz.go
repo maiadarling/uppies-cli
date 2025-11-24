@@ -73,7 +73,7 @@ func packageFolder(folder string) []byte {
 	return buf.Bytes()
 }
 
-func uploadArchive(archive []byte) api.SingleResponse {
+func uploadArchive(archive []byte) api.Site {
 	encoded := base64.StdEncoding.EncodeToString(archive)
 	client := api.NewAPIClient()
 	resp, err := client.UploadSite(encoded)
@@ -81,7 +81,8 @@ func uploadArchive(archive []byte) api.SingleResponse {
 		fmt.Println("Error uploading:", err)
 		os.Exit(1)
 	}
-	return resp
+
+	return resp.Data
 }
 
 func verifySite(name string) {
@@ -110,7 +111,7 @@ func verifySite(name string) {
 func plzRun(cmd *cobra.Command, args []string) {
 	var absFolder string
 	var zipBytes []byte
-	var resp api.SingleResponse
+	var site api.Site
 
 	folder := args[0]
 
@@ -119,10 +120,10 @@ func plzRun(cmd *cobra.Command, args []string) {
 
 	terminal.RunStage("Processing", func() { absFolder = resolvePath(folder) })
 	terminal.RunStage("Archiving", func() { zipBytes = packageFolder(absFolder) })
-	terminal.RunStage("Uploading", func() { resp = uploadArchive(zipBytes) })
-	terminal.RunStage("Verifying", func() { verifySite(resp.Data.Name) })
+	terminal.RunStage("Uploading", func() { site = uploadArchive(zipBytes) })
+	terminal.RunStage("Verifying", func() { verifySite(site.Name) })
 
-	fmt.Printf("You can now access your site at: %s\n", resp.Data.URL)
+	fmt.Printf("You can now access your site at: %s\n", site.URL)
 }
 
 func PlzCommand() *cobra.Command {

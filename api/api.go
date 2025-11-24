@@ -27,11 +27,17 @@ func NewAPIClient() *APIClient {
 }
 
 // MARK: Types
-type Item struct {
+type Site struct {
 	Name    string   `json:"name"`
 	URL     string   `json:"url"`
 	Domains []string `json:"domains"`
 	Status  string   `json:"status"`
+}
+
+type Release struct {
+	Id 	  	  string   `json:"id"`
+	SiteId    string   `json:"site_id"`
+	CreatedAt string   `json:"created_at"`
 }
 
 type Pagination struct {
@@ -53,9 +59,6 @@ type APIResponse[T any] struct {
 	Message    *string     `json:"message,omitempty"`
 	Error      *string     `json:"error,omitempty"`
 }
-
-type SingleResponse = APIResponse[Item]
-type ListResponse = APIResponse[[]Item]
 
 type UploadRequest struct {
 	Data string `json:"data"`
@@ -112,21 +115,29 @@ func (c *APIClient) request(method, path string, reqBody any, respBody any) erro
 	return nil
 }
 
-// MARK: API Methods
-func (c *APIClient) UploadSite(data string) (SingleResponse, error) {
-	var out SingleResponse
+// MARK: Methods (Site)
+
+func (c *APIClient) UploadSite(data string) (APIResponse[Site], error) {
+	var out APIResponse[Site]
 	err := c.request("POST", "/sites", UploadRequest{Data: data}, &out)
 	return out, err
 }
 
-func (c *APIClient) GetSite(name string) (SingleResponse, error) {
-	var out SingleResponse
+func (c *APIClient) GetSite(name string) (APIResponse[Site], error) {
+	var out APIResponse[Site]
 	err := c.request("GET", "/sites/"+name, nil, &out)
 	return out, err
 }
 
-func (c *APIClient) ListSites() (ListResponse, error) {
-	var out ListResponse
+func (c *APIClient) ListSites() (APIResponse[[]Site], error) {
+	var out APIResponse[[]Site]
 	err := c.request("GET", "/sites", nil, &out)
+	return out, err
+}
+
+// MARK: Methods (Releases)
+func (c *APIClient) GetReleases(siteId string) (APIResponse[[]Release], error) {
+	var out APIResponse[[]Release]
+	err := c.request("GET", "/sites/"+siteId+"/releases", nil, &out)
 	return out, err
 }
